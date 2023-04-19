@@ -35,17 +35,19 @@ public class KubernetesRunner {
 
         String threescaleTenantSecretName = System.getenv().getOrDefault("THREESCALE_SECRET", "3scale-" + user + "-tenant-secret");
 
+        String threescaleTenantSecretCopyName = System.getenv().getOrDefault("THREESCALE_SECRET_COPY", "3scale-tenant-secret");
+
         Secret threescaleTenantSecret = client.secrets().inNamespace(threescaleNamespace).withName(threescaleTenantSecretName).get();
         if (threescaleTenantSecret == null) {
             LOGGER.error("Secret " + threescaleTenantSecretName + " not found in namespace " + threescaleNamespace + ". Exiting");
             return -1;
         }
 
-        Secret newSecret = new SecretBuilder().withNewMetadata().withName(threescaleTenantSecretName).endMetadata()
+        Secret newSecret = new SecretBuilder().withNewMetadata().withName(threescaleTenantSecretCopyName).endMetadata()
                 .addToData(threescaleTenantSecret.getData()).build();
         client.secrets().inNamespace(namespace).resource(newSecret).createOrReplace();
 
-        LOGGER.info("Secret " + threescaleTenantSecretName + " created in namespace " + namespace + ".");
+        LOGGER.info("Secret " + threescaleTenantSecretCopyName + " created in namespace " + namespace + ".");
 
         return 0;
     }
